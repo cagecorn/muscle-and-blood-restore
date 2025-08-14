@@ -11,6 +11,7 @@ import { MoveTowardsPlayerNode } from '../ai/MoveTowardsPlayerNode.js';
 import { mercenaryData } from '../data/mercenaries.js';
 import { statEngine } from '../utils/StatEngine.js';
 import { HealthBar } from '../ui/HealthBar.js';
+import { CombatManager } from '../engine/CombatManager.js';
 
 export class WorldMapScene extends Scene {
     constructor() {
@@ -21,6 +22,7 @@ export class WorldMapScene extends Scene {
         this.animationEngine = null;
         this.turnEngine = null;
         this.ai = null;
+        this.isBattling = false;
     }
 
     create() {
@@ -56,35 +58,31 @@ export class WorldMapScene extends Scene {
         this.enemySquad.tileX = enemyStartTileX;
         this.enemySquad.tileY = enemyStartTileY;
 
-        // === 스탯 설정 로직 추가 시작 ===
-        const plagueDoctorData = mercenaryData.plagueDoctor;
-        this.squad.commander = {
-            ...plagueDoctorData,
-            finalStats: statEngine.calculateStats(plagueDoctorData, plagueDoctorData.baseStats)
+        // === 스탯 설정 로직 수정: 유닛을 부대 객체 내부에 저장 ===
+
+        // 1. 아군 부대 유닛 설정
+        this.squad.units = {
+            commander: this.createUnitData(mercenaryData.plagueDoctor),
+            gunner: this.createUnitData(mercenaryData.gunner),
+            medic: this.createUnitData(mercenaryData.medic)
         };
-
-        const warriorData = mercenaryData.warrior;
-        this.enemySquad.warrior = {
-            ...warriorData,
-            finalStats: statEngine.calculateStats(warriorData, warriorData.baseStats)
+        
+        // 2. 적군 부대 유닛 설정
+        this.enemySquad.units = {
+            warrior: this.createUnitData(mercenaryData.warrior),
+            gunner: this.createUnitData(mercenaryData.gunner),
+            medic: this.createUnitData(mercenaryData.medic)
         };
+        
+        // === 체력바 생성 로직 수정: 부대 객체에 체력바를 직접 연결 ===
+        this.squad.healthBar = new HealthBar(this, this.squad.x - 30, this.squad.y - 40);
+        this.enemySquad.healthBar = new HealthBar(this, this.enemySquad.x - 30, this.enemySquad.y - 40);
 
-        const gunnerData = mercenaryData.gunner;
-        this.squad.gunnerStats = statEngine.calculateStats(gunnerData, gunnerData.baseStats);
-        this.enemySquad.gunnerStats = this.squad.gunnerStats;
+        // 전투 관리자 생성
+        this.combatManager = new CombatManager(this);
 
-        const medicData = mercenaryData.medic;
-        this.squad.medicStats = statEngine.calculateStats(medicData, medicData.baseStats);
-        this.enemySquad.medicStats = this.squad.medicStats;
-
-        this.squad.commander.currentHp = this.squad.commander.finalStats.hp;
-        this.enemySquad.warrior.currentHp = this.enemySquad.warrior.finalStats.hp;
-        // === 스탯 설정 로직 추가 종료 ===
-
-        // === 체력바 생성 로직 추가 시작 ===
-        this.playerHealthBar = new HealthBar(this, this.squad.x - 30, this.squad.y - 40);
-        this.enemyHealthBar = new HealthBar(this, this.enemySquad.x - 30, this.enemySquad.y - 40);
-        // === 체력바 생성 로직 추가 종료 ===
+        // === 충돌 및 전투 시작 로직 추가 ===
+        this.physics.add.collider(this.squad, this.enemySquad, this.handleSquadCollision, null, this);
 
         // AI 설정
         const blackboard = new Blackboard();
@@ -113,17 +111,58 @@ export class WorldMapScene extends Scene {
         });
     }
 
-    update() {
-        if (this.squad && this.playerHealthBar) {
-            this.playerHealthBar.setPosition(this.squad.x - 30, this.squad.y - 50);
-            const playerHpPercent = (this.squad.commander.currentHp / this.squad.commander.finalStats.hp) * 100;
-            this.playerHealthBar.setHealth(playerHpPercent);
-        }
+    /**
+     * 유닛 데이터를 생성하고 초기화하는 헬퍼 함수
+     * @param {object} unitBaseData - mercenaryData에서 가져온 유닛 원본 데이터
+     * @returns {object} 게임에서 사용할 유닛 데이터
+     */
+    createUnitData(unitBaseData) {
+        const finalStats = statEngine.calculateStats(unitBaseData, unitBaseData.baseStats, []);
+        return {
+            ...unitBaseData,
+            finalStats,
+            currentHp: finalStats.hp
+        };
+    }
+    
+    /**
+     * 부대 충돌 시 호출되는 콜백 함수
+     * @param {Phaser.GameObjects.Sprite} squad - 아군 부대
+     * @param {Phaser.GameObjects.Sprite} enemySquad - 적군 부대
+     */
+    handleSquadCollision(squad, enemySquad) {
+        // 이미 전투 중이면 아무것도 하지 않음
+        if (this.isBattling) return;
 
-        if (this.enemySquad && this.enemyHealthBar) {
-            this.enemyHealthBar.setPosition(this.enemySquad.x - 30, this.enemySquad.y - 50);
-            const enemyHpPercent = (this.enemySquad.warrior.currentHp / this.enemySquad.warrior.finalStats.hp) * 100;
-            this.enemyHealthBar.setHealth(enemyHpPercent);
+        // 전투 상태로 전환
+        this.isBattling = true;
+        
+        // 전투가 시작되면 두 부대 모두 정지
+        squad.body.stop();
+        enemySquad.body.stop();
+        
+        // CombatManager를 통해 전투 턴 시작
+        this.combatManager.initiateCombatTurn(squad, enemySquad);
+    }
+
+    update() {
+        // 전투 중이 아닐 때만 부대 이동 처리
+        if (!this.isBattling) {
+            // 기존의 이동 로직 (this.squad.body.setVelocity, this.moveEnemySquad 등)
+            // ...
+        }
+        
+        // 체력바 위치 및 값 업데이트
+        if (this.squad.active) {
+            this.squad.healthBar.setPosition(this.squad.x - 30, this.squad.y - 50);
+            const playerHpPercent = (this.squad.units.commander.currentHp / this.squad.units.commander.finalStats.hp) * 100;
+            this.squad.healthBar.setHealth(playerHpPercent);
+        }
+        
+        if (this.enemySquad.active) {
+            this.enemySquad.healthBar.setPosition(this.enemySquad.x - 30, this.enemySquad.y - 50);
+            const enemyHpPercent = (this.enemySquad.units.warrior.currentHp / this.enemySquad.units.warrior.finalStats.hp) * 100;
+            this.enemySquad.healthBar.setHealth(enemyHpPercent);
         }
     }
 
