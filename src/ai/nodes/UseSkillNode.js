@@ -54,31 +54,21 @@ class UseSkillNode extends Node {
 
         // MBTI 스택 버프 시스템 제거로 관련 로직을 삭제합니다.
 
-        // 최종 사용할 스킬 데이터를 준비합니다 (숙련도 보너스 적용)
-        const finalSkill = this._applyProficiency(unit, modifiedSkill);
-
-        // 사거리 확인: 스킬의 range가 없으면 유닛의 기본 attackRange 사용
-        const distance = Math.abs(unit.gridX - skillTarget.gridX) + Math.abs(unit.gridY - skillTarget.gridY);
-        const allowedRange = finalSkill.range ?? unit.finalStats.attackRange ?? 1;
-        if (distance > allowedRange) {
-            debugAIManager.logNodeResult(
-                NodeState.FAILURE,
-                `스킬 [${finalSkill.name}] 사거리 밖 (사거리: ${allowedRange}, 거리: ${distance})`
-            );
-            return NodeState.FAILURE;
-        }
-
-        debugSkillExecutionManager.logSkillExecution(unit, baseSkillData, finalSkill, instanceData.grade);
+        debugSkillExecutionManager.logSkillExecution(unit, baseSkillData, modifiedSkill, instanceData.grade);
         // ✨ --- [핵심 수정] 공격 또는 지원 스킬 사용 시 플래그 설정 --- ✨
         const offensiveTypes = ['ACTIVE', 'DEBUFF'];
-        const isOffensive = offensiveTypes.includes(finalSkill.type);
-        const isSupport = finalSkill.tags?.includes(SKILL_TAGS.AID);
+        const isOffensive = offensiveTypes.includes(modifiedSkill.type);
+        const isSupport = modifiedSkill.tags?.includes(SKILL_TAGS.AID);
 
         if (isOffensive || isSupport) {
             // AIManager가 이 플래그를 보고 열망 감소 여부를 결정합니다.
             unit.offensiveActionTakenThisTurn = true;
         }
         // ✨ --- 수정 완료 --- ✨
+
+
+        // 최종 사용할 스킬 데이터를 준비합니다 (숙련도 보너스 적용)
+        const finalSkill = this._applyProficiency(unit, modifiedSkill);
 
         if (this.narrationEngine) {
             const targetBalance = yinYangEngine.getBalance(skillTarget.uniqueId);
