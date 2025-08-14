@@ -14,9 +14,9 @@ export class EnemySquad extends Phaser.GameObjects.Container {
         super(scene, x, y);
 
         // 1. 워리어, 거너, 메딕 스프라이트 생성 및 좌우반전
-        const warrior = scene.add.sprite(0, 10, 'warrior-entj').setScale(0.15).setFlipX(true);
-        const gunner = scene.add.sprite(-25, -10, 'gunner').setScale(0.1).setFlipX(true);
-        const medic = scene.add.sprite(25, -10, 'medic').setScale(0.1).setFlipX(true);
+        const warrior = scene.add.sprite(0, 10, 'warrior').setScale(0.7).setFlipX(true);
+        const gunner = scene.add.sprite(-25, -10, 'gunner').setScale(0.7).setFlipX(true);
+        const medic = scene.add.sprite(25, -10, 'medic').setScale(0.7).setFlipX(true);
 
         // 2. Y-맵핑 (depth) 적용
         gunner.setDepth(1);
