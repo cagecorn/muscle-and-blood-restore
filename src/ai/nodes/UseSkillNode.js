@@ -43,6 +43,15 @@ class UseSkillNode extends Node {
             return NodeState.FAILURE;
         }
 
+        // 잘못된 대상에게 스킬을 사용하려는지 확인합니다.
+        if (
+            (modifiedSkill.targetType === 'ally' && skillTarget.team !== unit.team) ||
+            (modifiedSkill.targetType === 'enemy' && skillTarget.team === unit.team)
+        ) {
+            debugAIManager.logNodeResult(NodeState.FAILURE, '부적절한 대상에게 스킬 사용 시도');
+            return NodeState.FAILURE;
+        }
+
         // MBTI 스택 버프 시스템 제거로 관련 로직을 삭제합니다.
 
         debugSkillExecutionManager.logSkillExecution(unit, baseSkillData, modifiedSkill, instanceData.grade);
