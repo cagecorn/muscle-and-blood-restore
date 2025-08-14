@@ -35,8 +35,8 @@ export const mercenaryData = {
     gunner: {
         id: 'gunner',
         name: '거너',
-        // ✨ [수정] ai_archetype을 'gunner'로 명시하여 ENFP AI와 연결
-        ai_archetype: 'gunner',
+        // 전투 시에는 원거리 AI를 사용
+        ai_archetype: 'ranged',
         uiImage: 'assets/images/territory/gunner-ui.png',
         battleSprite: 'gunner',
         // ✨ 모든 행동 스프라이트를 기본(idle)으로 통일
@@ -67,7 +67,8 @@ export const mercenaryData = {
     mechanic: {
         id: 'mechanic',
         name: '메카닉',
-        ai_archetype: 'enfj',
+        // 지원형 클래스이므로 힐러 AI 적용
+        ai_archetype: 'healer',
         uiImage: 'assets/images/unit/mechanic-ui.png',
         battleSprite: 'mechanic',
         sprites: {
@@ -157,7 +158,8 @@ export const mercenaryData = {
     flyingmen: {
         id: 'flyingmen',
         name: '플라잉맨',
-        ai_archetype: 'assassin',
+        // 돌격형이지만 기본 근접 AI 사용
+        ai_archetype: 'melee',
         uiImage: 'assets/images/unit/flyingmen-ui.png',
         battleSprite: 'flyingmen',
         // ✨ 모든 행동 스프라이트를 기본(idle)으로 통일
@@ -246,7 +248,8 @@ export const mercenaryData = {
     clown: {
         id: 'clown',
         name: '광대',
-        ai_archetype: 'assassin',
+        // 기동성은 높지만 근접 전투에 특화된 AI 사용
+        ai_archetype: 'melee',
         uiImage: 'assets/images/unit/clown-ui.png',
         battleSprite: 'clown',
         sprites: {
@@ -399,7 +402,8 @@ export const mercenaryData = {
     hacker: {
         id: 'hacker',
         name: '해커',
-        ai_archetype: 'melee', // 기본 AI는 근접 타입으로 설정
+        // 해커는 2타일 사거리로 원거리 AI와 더 잘 맞습니다.
+        ai_archetype: 'ranged',
         uiImage: 'assets/images/unit/hacker-ui.png',
         battleSprite: 'hacker',
         sprites: {
@@ -430,7 +434,8 @@ export const mercenaryData = {
     ghost: {
         id: 'ghost',
         name: '고스트',
-        ai_archetype: 'assassin',
+        // 은신형이지만 전투는 근접 AI로 처리
+        ai_archetype: 'melee',
         uiImage: 'assets/images/unit/ghost-ui.png',
         battleSprite: 'ghost',
         sprites: {
