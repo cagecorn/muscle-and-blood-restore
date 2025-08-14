@@ -1,13 +1,11 @@
 export class WorldMapTurnEngine {
     /**
-     * @param {Phaser.Scene} scene
-     * @param {LeaderEngine} leaderEngine
+     * @param {Phaser.Scene} scene 제어할 씬
      */
-    constructor(scene, leaderEngine) {
+    constructor(scene) {
         this.scene = scene;
-        this.leader = leaderEngine;
+        this.hasMovedThisTurn = false;
         this.isPlayerTurn = true;
-
         this.setupKeyboardControls();
     }
 
@@ -26,17 +24,17 @@ export class WorldMapTurnEngine {
      * @param {'up' | 'down' | 'left' | 'right'} direction
      */
     handleMove(direction) {
-        // 이동이 이미 이루어졌다면 이번 턴에는 추가 이동을 허용하지 않습니다.
-        if (!this.isPlayerTurn || this.leader.hasMovedThisTurn) return;
+        if (!this.isPlayerTurn || this.hasMovedThisTurn) return;
 
         this.isPlayerTurn = false;
-        this.leader.move(direction);
+        this.hasMovedThisTurn = true;
 
-        this.scene.events.emit('turnTaken');
+        // WorldMapScene의 moveSquad 메서드를 호출합니다.
+        this.scene.moveSquad(direction);
 
         this.scene.time.delayedCall(200, () => {
             this.isPlayerTurn = true;
-            this.leader.hasMovedThisTurn = false; // 턴 종료 시 이동 플래그 리셋
+            this.hasMovedThisTurn = false;
         });
     }
 }
