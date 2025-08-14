@@ -1,5 +1,6 @@
 import Node, { NodeState } from './Node.js';
 import { debugAIManager } from '../../game/debug/DebugAIManager.js';
+import { areaOfEffectEngine } from '../../game/utils/AreaOfEffectEngine.js';
 
 class IsSkillInRangeNode extends Node {
     async evaluate(unit, blackboard) {
@@ -17,6 +18,27 @@ class IsSkillInRangeNode extends Node {
         const distance = Math.abs(unit.gridX - target.gridX) + Math.abs(unit.gridY - target.gridY);
 
         if (distance <= attackRange) {
+            if (skillData.aoe) {
+                const enemyUnits = blackboard.get('enemyUnits') || [];
+                const targetPos = { col: target.gridX, row: target.gridY };
+                const affectedCells = areaOfEffectEngine.getAffectedCells(
+                    skillData.aoe.shape,
+                    targetPos,
+                    skillData.aoe.radius || skillData.aoe.length,
+                    unit
+                );
+                const hasEnemy = enemyUnits.some(e =>
+                    e.currentHp > 0 &&
+                    affectedCells.some(cell => cell.col === e.gridX && cell.row === e.gridY)
+                );
+                if (!hasEnemy) {
+                    debugAIManager.logNodeResult(
+                        NodeState.FAILURE,
+                        `스킬 [${skillData.name}] 범위 내 적 없음`
+                    );
+                    return NodeState.FAILURE;
+                }
+            }
             debugAIManager.logNodeResult(
                 NodeState.SUCCESS,
                 `스킬 [${skillData.name}] 사거리 내 (사거리: ${attackRange})`
