@@ -1,7 +1,8 @@
 import * as Phaser from 'https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.esm.js';
 
 /**
- * 지휘관, 거너, 메딕으로 구성된 부대를 나타내는 컨테이너
+ * 지휘관, 거너, 메딕으로 구성된 부대를 나타내는 컨테이너.
+ * 스탯과 같은 유닛 데이터는 외부에서 주입됩니다.
  */
 export class Squad extends Phaser.GameObjects.Container {
     /**

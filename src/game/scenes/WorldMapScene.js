@@ -2,8 +2,8 @@ import { Scene } from 'https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.es
 import { WorldMapEngine } from '../utils/WorldMapEngine.js';
 import { WorldMapTurnEngine } from '../utils/WorldMapTurnEngine.js';
 import { CameraControlEngine } from '../utils/CameraControlEngine.js';
-import { squadEngine } from '../utils/SquadEngine.js';
 import { AnimationEngine } from '../utils/AnimationEngine.js';
+import { Squad } from '../entities/Squad.js';
 import { EnemySquad } from '../entities/EnemySquad.js';
 import { Blackboard } from '../ai/Blackboard.js';
 import { Sequence } from '../ai/Sequence.js';
@@ -41,7 +41,7 @@ export class WorldMapScene extends Scene {
         // 플레이어 부대 생성
         const playerStartTileX = 5;
         const playerStartTileY = Math.floor(this.mapEngine.MAP_HEIGHT_IN_TILES / 2);
-        this.squad = squadEngine.createSquad(
+        this.squad = new Squad(
             this,
             playerStartTileX * this.mapEngine.TILE_WIDTH + this.mapEngine.TILE_WIDTH / 2,
             playerStartTileY * this.mapEngine.TILE_HEIGHT + this.mapEngine.TILE_HEIGHT / 2
