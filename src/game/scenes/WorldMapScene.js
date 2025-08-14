@@ -23,8 +23,6 @@ export class WorldMapScene extends Scene {
         this.turnEngine = null;
         this.ai = null;
         this.isBattling = false;
-        this.playerHealthBar = null;
-        this.enemyHealthBar = null;
     }
 
     create() {
@@ -76,9 +74,9 @@ export class WorldMapScene extends Scene {
             medic: this.createUnitData(mercenaryData.medic)
         };
         
-        // 체력바 생성
-        this.playerHealthBar = new HealthBar(this, this.squad.x - 30, this.squad.y - 40);
-        this.enemyHealthBar = new HealthBar(this, this.enemySquad.x - 30, this.enemySquad.y - 40);
+        // === 체력바 생성 로직 수정: 부대 객체에 체력바를 직접 연결 ===
+        this.squad.healthBar = new HealthBar(this, this.squad.x - 30, this.squad.y - 40);
+        this.enemySquad.healthBar = new HealthBar(this, this.enemySquad.x - 30, this.enemySquad.y - 40);
 
         // 전투 관리자 생성
         this.combatManager = new CombatManager(this);
@@ -155,20 +153,16 @@ export class WorldMapScene extends Scene {
         }
         
         // 체력바 위치 및 값 업데이트
-        if (this.squad && this.playerHealthBar) {
-            this.playerHealthBar.setPosition(this.squad.x - 30, this.squad.y - 50);
+        if (this.squad.active) {
+            this.squad.healthBar.setPosition(this.squad.x - 30, this.squad.y - 50);
             const playerHpPercent = (this.squad.units.commander.currentHp / this.squad.units.commander.finalStats.hp) * 100;
-            this.playerHealthBar.setHealth(playerHpPercent);
+            this.squad.healthBar.setHealth(playerHpPercent);
         }
-
-        if (this.enemySquad && this.enemyHealthBar && this.enemySquad.active) {
-            this.enemyHealthBar.setPosition(this.enemySquad.x - 30, this.enemySquad.y - 50);
+        
+        if (this.enemySquad.active) {
+            this.enemySquad.healthBar.setPosition(this.enemySquad.x - 30, this.enemySquad.y - 50);
             const enemyHpPercent = (this.enemySquad.units.warrior.currentHp / this.enemySquad.units.warrior.finalStats.hp) * 100;
-            this.enemyHealthBar.setHealth(enemyHpPercent);
-        } else if (this.enemyHealthBar && !this.enemySquad.active) {
-            // 적이 비활성화(파괴)되면 체력바도 숨김
-            this.enemyHealthBar.destroy();
-            this.enemyHealthBar = null;
+            this.enemySquad.healthBar.setHealth(enemyHpPercent);
         }
     }
 
