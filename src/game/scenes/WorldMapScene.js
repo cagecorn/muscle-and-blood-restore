@@ -8,9 +8,6 @@ import { EnemySquad } from '../entities/EnemySquad.js';
 import { Blackboard } from '../ai/Blackboard.js';
 import { Sequence } from '../ai/Sequence.js';
 import { MoveTowardsPlayerNode } from '../ai/MoveTowardsPlayerNode.js';
-import { mercenaryData } from '../data/mercenaries.js';
-import { statEngine } from '../utils/StatEngine.js';
-import { HealthBar } from '../ui/HealthBar.js';
 
 export class WorldMapScene extends Scene {
     constructor() {
@@ -56,36 +53,6 @@ export class WorldMapScene extends Scene {
         this.enemySquad.tileX = enemyStartTileX;
         this.enemySquad.tileY = enemyStartTileY;
 
-        // === 스탯 설정 로직 추가 시작 ===
-        const plagueDoctorData = mercenaryData.plagueDoctor;
-        this.squad.commander = {
-            ...plagueDoctorData,
-            finalStats: statEngine.calculateStats(plagueDoctorData, plagueDoctorData.baseStats)
-        };
-
-        const warriorData = mercenaryData.warrior;
-        this.enemySquad.warrior = {
-            ...warriorData,
-            finalStats: statEngine.calculateStats(warriorData, warriorData.baseStats)
-        };
-
-        const gunnerData = mercenaryData.gunner;
-        this.squad.gunnerStats = statEngine.calculateStats(gunnerData, gunnerData.baseStats);
-        this.enemySquad.gunnerStats = this.squad.gunnerStats;
-
-        const medicData = mercenaryData.medic;
-        this.squad.medicStats = statEngine.calculateStats(medicData, medicData.baseStats);
-        this.enemySquad.medicStats = this.squad.medicStats;
-
-        this.squad.commander.currentHp = this.squad.commander.finalStats.hp;
-        this.enemySquad.warrior.currentHp = this.enemySquad.warrior.finalStats.hp;
-        // === 스탯 설정 로직 추가 종료 ===
-
-        // === 체력바 생성 로직 추가 시작 ===
-        this.playerHealthBar = new HealthBar(this, this.squad.x - 30, this.squad.y - 40);
-        this.enemyHealthBar = new HealthBar(this, this.enemySquad.x - 30, this.enemySquad.y - 40);
-        // === 체력바 생성 로직 추가 종료 ===
-
         // AI 설정
         const blackboard = new Blackboard();
         blackboard.set('player', this.squad);
@@ -111,20 +78,6 @@ export class WorldMapScene extends Scene {
                 territoryContainer.style.display = 'block';
             }
         });
-    }
-
-    update() {
-        if (this.squad && this.playerHealthBar) {
-            this.playerHealthBar.setPosition(this.squad.x - 30, this.squad.y - 50);
-            const playerHpPercent = (this.squad.commander.currentHp / this.squad.commander.finalStats.hp) * 100;
-            this.playerHealthBar.setHealth(playerHpPercent);
-        }
-
-        if (this.enemySquad && this.enemyHealthBar) {
-            this.enemyHealthBar.setPosition(this.enemySquad.x - 30, this.enemySquad.y - 50);
-            const enemyHpPercent = (this.enemySquad.warrior.currentHp / this.enemySquad.warrior.finalStats.hp) * 100;
-            this.enemyHealthBar.setHealth(enemyHpPercent);
-        }
     }
 
     // 플레이어 부대 이동 메서드
