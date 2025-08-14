@@ -6,6 +6,7 @@ import { NodeState } from './nodes/Node.js';
 import { createMeleeAI } from './behaviors/MeleeAI.js';
 import { createRangedAI } from './behaviors/RangedAI.js';
 import { createHealerAI } from './behaviors/createHealerAI.js';
+import { createFlyingmanAI } from './behaviors/createFlyingmanAI.js';
 import { createINTJ_AI } from './behaviors/createINTJ_AI.js';
 // ✨ [신규] INTP AI import
 import { createINTP_AI } from './behaviors/createINTP_AI.js';
@@ -40,9 +41,6 @@ import { createENFJ_AI } from './behaviors/createENFJ_AI.js';
 // ✨ 용병 데이터에서 ai_archetype을 참조합니다.
 import { mercenaryData } from '../game/data/mercenaries.js';
 
-// MBTI 전투 AI 사용 여부 (기본값: 비활성화)
-const USE_MBTI_AI = false;
-
 /**
  * 게임 내 모든 AI 유닛을 관리하고, 각 유닛의 행동 트리를 실행합니다.
  */
@@ -71,7 +69,7 @@ class AIManager {
      */
     _createAIFromArchetype(unit) {
         const mbti = unit.mbti;
-        if (USE_MBTI_AI && mbti) {
+        if (mbti) {
             const mbtiString = (mbti.E > mbti.I ? 'E' : 'I') +
                                (mbti.S > mbti.N ? 'S' : 'N') +
                                (mbti.T > mbti.F ? 'T' : 'F') +
@@ -110,12 +108,20 @@ class AIManager {
         }
 
         const unitBaseData = mercenaryData[unit.id];
+        // ✨ [수정] 거너(gunner)가 ai_archetype을 사용하도록 수정
         if (unitBaseData && unitBaseData.ai_archetype) {
             switch (unitBaseData.ai_archetype) {
                 case 'ranged':
                     return createRangedAI(this.aiEngines);
                 case 'healer':
                     return createHealerAI(this.aiEngines);
+                case 'assassin':
+                    return createFlyingmanAI(this.aiEngines);
+                // ✨ [신규] 거너가 ENFP AI를 사용하도록 연결
+                case 'gunner':
+                    return createENFP_AI(this.aiEngines);
+                case 'enfj':
+                    return createENFJ_AI(this.aiEngines);
                 case 'melee':
                 default:
                     return createMeleeAI(this.aiEngines);
@@ -137,7 +143,6 @@ class AIManager {
             case 'gunner':
             case 'nanomancer':
             case 'esper':
-            case 'hacker':
                 fallbackAI = createRangedAI(this.aiEngines);
                 break;
 
@@ -149,9 +154,17 @@ class AIManager {
                 break;
 
             // --- 그 외 모든 근접/돌격 클래스 ---
+            case 'warrior':
+            case 'commander':
+            case 'android':
+            case 'sentinel':
+            case 'flyingmen':
+            case 'ghost':
+            case 'darkKnight':
+            case 'hacker':
+            case 'clown':
+            case 'paladin':
             default:
-                // warrior, commander, android, sentinel, flyingmen, ghost,
-                // darkKnight, clown, paladin 등
                 fallbackAI = createMeleeAI(this.aiEngines);
                 break;
         }
