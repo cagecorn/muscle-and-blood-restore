@@ -3,7 +3,6 @@ import * as Phaser from 'https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.
 /**
  * 적 부대를 표현하는 컨테이너.
  * 플레이어 부대와 동일한 구성으로 좌우가 반전된 스프라이트를 사용합니다.
- * 스탯과 같은 유닛 데이터는 외부에서 주입됩니다.
  */
 export class EnemySquad extends Phaser.GameObjects.Container {
     /**
