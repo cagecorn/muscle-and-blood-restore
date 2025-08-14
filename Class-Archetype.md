@@ -11,6 +11,7 @@
 - Force Major
 - Berserker
 - Spellbreaker
+- Trapmaster
 
 ## 2. 어미-자식 관계
 각 아키타입이 속한 상위 클래스는 다음과 같습니다.
@@ -19,7 +20,7 @@
 - **Nanomancer**: Frostweaver, Arcane Blade, Force Major
 - **Priest**: Aquilifer
 - **Rogue**: Executioner
-- **Ranger**: (미구현 – 예정된 아키타입: Trapmaster)
+- **Ranger**: Trapmaster
 - **Necromancer**: (미구현 – 예정된 아키타입: Dreadbringer)
 
 ## 3. 자식 아키타입이 부족한 클래스
