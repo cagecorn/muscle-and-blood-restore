@@ -4,14 +4,20 @@ import { WorldMapTurnEngine } from '../utils/WorldMapTurnEngine.js';
 import { CameraControlEngine } from '../utils/CameraControlEngine.js';
 import { squadEngine } from '../utils/SquadEngine.js';
 import { AnimationEngine } from '../utils/AnimationEngine.js';
+import { EnemySquad } from '../entities/EnemySquad.js';
+import { Blackboard } from '../ai/Blackboard.js';
+import { Sequence } from '../ai/Sequence.js';
+import { MoveTowardsPlayerNode } from '../ai/MoveTowardsPlayerNode.js';
 
 export class WorldMapScene extends Scene {
     constructor() {
         super('WorldMapScene');
-        /** @type {?import('../entities/Squad.js').Squad} */
         this.squad = null;
+        this.enemySquad = null;
         this.mapEngine = null;
         this.animationEngine = null;
+        this.turnEngine = null;
+        this.ai = null;
     }
 
     create() {
@@ -23,21 +29,41 @@ export class WorldMapScene extends Scene {
         this.mapEngine = new WorldMapEngine(this);
         this.mapEngine.create();
 
-        // AnimationEngine 인스턴스 생성
         this.animationEngine = new AnimationEngine(this);
 
-        // 1. 부대 생성 (맵 중앙)
-        const startTileX = Math.floor(this.mapEngine.MAP_WIDTH_IN_TILES / 2);
-        const startTileY = Math.floor(this.mapEngine.MAP_HEIGHT_IN_TILES / 2);
-        const startX = startTileX * this.mapEngine.TILE_WIDTH + this.mapEngine.TILE_WIDTH / 2;
-        const startY = startTileY * this.mapEngine.TILE_HEIGHT + this.mapEngine.TILE_HEIGHT / 2;
+        // 플레이어 부대 생성
+        const playerStartTileX = 5;
+        const playerStartTileY = Math.floor(this.mapEngine.MAP_HEIGHT_IN_TILES / 2);
+        this.squad = squadEngine.createSquad(
+            this,
+            playerStartTileX * this.mapEngine.TILE_WIDTH + this.mapEngine.TILE_WIDTH / 2,
+            playerStartTileY * this.mapEngine.TILE_HEIGHT + this.mapEngine.TILE_HEIGHT / 2
+        );
+        this.squad.tileX = playerStartTileX;
+        this.squad.tileY = playerStartTileY;
 
-        this.squad = squadEngine.createSquad(this, startX, startY);
-        this.squad.tileX = startTileX;
-        this.squad.tileY = startTileY;
+        // 적 부대 생성 (맵 반대편)
+        const enemyStartTileX = this.mapEngine.MAP_WIDTH_IN_TILES - 5;
+        const enemyStartTileY = Math.floor(this.mapEngine.MAP_HEIGHT_IN_TILES / 2);
+        this.enemySquad = new EnemySquad(
+            this,
+            enemyStartTileX * this.mapEngine.TILE_WIDTH + this.mapEngine.TILE_WIDTH / 2,
+            enemyStartTileY * this.mapEngine.TILE_HEIGHT + this.mapEngine.TILE_HEIGHT / 2
+        );
+        this.enemySquad.tileX = enemyStartTileX;
+        this.enemySquad.tileY = enemyStartTileY;
 
-        // 2. 턴 엔진 및 카메라 설정
-        new WorldMapTurnEngine(this);
+        // AI 설정
+        const blackboard = new Blackboard();
+        blackboard.set('player', this.squad);
+        blackboard.set('self', this.enemySquad);
+
+        this.ai = new Sequence(blackboard, [
+            new MoveTowardsPlayerNode(blackboard, this)
+        ]);
+
+        // 턴 엔진 및 카메라 설정
+        this.turnEngine = new WorldMapTurnEngine(this, this.ai);
         new CameraControlEngine(this);
 
         this.cameras.main.startFollow(this.squad, true, 0.08, 0.08);
@@ -54,10 +80,7 @@ export class WorldMapScene extends Scene {
         });
     }
 
-    /**
-     * 부대를 지정된 방향으로 한 칸 이동시킵니다.
-     * @param {'up' | 'down' | 'left' | 'right'} direction
-     */
+    // 플레이어 부대 이동 메서드
     moveSquad(direction) {
         let targetX = this.squad.tileX;
         let targetY = this.squad.tileY;
@@ -74,12 +97,32 @@ export class WorldMapScene extends Scene {
 
             this.squad.tileX = targetX;
             this.squad.tileY = targetY;
-
             const worldX = targetX * this.mapEngine.TILE_WIDTH + this.mapEngine.TILE_WIDTH / 2;
             const worldY = targetY * this.mapEngine.TILE_HEIGHT + this.mapEngine.TILE_HEIGHT / 2;
-
-            // AnimationEngine을 사용하여 부드러운 이동 애니메이션 적용
             this.animationEngine.moveTo(this.squad, worldX, worldY, 200);
+        }
+    }
+
+    // 적 부대 이동 메서드
+    moveEnemySquad(direction) {
+        let targetX = this.enemySquad.tileX;
+        let targetY = this.enemySquad.tileY;
+
+        switch (direction) {
+            case 'up': targetY -= 1; break;
+            case 'down': targetY += 1; break;
+            case 'left': targetX -= 1; break;
+            case 'right': targetX += 1; break;
+        }
+
+        if (targetX >= 0 && targetX < this.mapEngine.MAP_WIDTH_IN_TILES &&
+            targetY >= 0 && targetY < this.mapEngine.MAP_HEIGHT_IN_TILES) {
+
+            this.enemySquad.tileX = targetX;
+            this.enemySquad.tileY = targetY;
+            const worldX = targetX * this.mapEngine.TILE_WIDTH + this.mapEngine.TILE_WIDTH / 2;
+            const worldY = targetY * this.mapEngine.TILE_HEIGHT + this.mapEngine.TILE_HEIGHT / 2;
+            this.animationEngine.moveTo(this.enemySquad, worldX, worldY, 200);
         }
     }
 }

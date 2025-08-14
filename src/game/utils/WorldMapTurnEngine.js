@@ -1,10 +1,11 @@
 export class WorldMapTurnEngine {
     /**
      * @param {Phaser.Scene} scene 제어할 씬
+     * @param {import('../ai/Node.js').Node} [enemyAI] 적 AI 루트 노드
      */
-    constructor(scene) {
+    constructor(scene, enemyAI) {
         this.scene = scene;
-        this.hasMovedThisTurn = false;
+        this.enemyAI = enemyAI;
         this.isPlayerTurn = true;
         this.setupKeyboardControls();
     }
@@ -20,22 +21,23 @@ export class WorldMapTurnEngine {
     }
 
     /**
-     * 이동을 처리하고 턴을 넘깁니다.
+     * 이동을 처리하고 적 AI 턴을 실행합니다.
      * @param {'up' | 'down' | 'left' | 'right'} direction
      */
     handleMove(direction) {
-        if (!this.isPlayerTurn || this.hasMovedThisTurn) return;
+        if (!this.isPlayerTurn) return;
 
         this.isPlayerTurn = false;
-        this.hasMovedThisTurn = true;
 
-        // WorldMapScene의 moveSquad 메서드를 호출합니다.
+        // 플레이어 이동
         this.scene.moveSquad(direction);
 
-        this.scene.time.delayedCall(200, () => {
+        // 적 AI 행동 수행 후 턴 반환
+        this.scene.time.delayedCall(300, () => {
+            if (this.enemyAI) {
+                this.enemyAI.execute();
+            }
             this.isPlayerTurn = true;
-            this.hasMovedThisTurn = false;
         });
     }
 }
-
