@@ -14,9 +14,9 @@ export class Squad extends Phaser.GameObjects.Container {
 
         // 1. 지휘관, 거너, 메딕 스프라이트 생성
         // 지휘관은 요청대로 타일보다 작게 축소합니다.
-        const commander = scene.add.sprite(0, 10, 'leader-infp').setScale(0.7);
-        const gunner = scene.add.sprite(-25, -10, 'gunner').setScale(0.7);
-        const medic = scene.add.sprite(25, -10, 'medic').setScale(0.7);
+        const commander = scene.add.sprite(0, 10, 'leader-infp').setScale(0.15);
+        const gunner = scene.add.sprite(-25, -10, 'gunner').setScale(0.1);
+        const medic = scene.add.sprite(25, -10, 'medic').setScale(0.1);
 
         // 2. Y-맵핑 적용 (depth가 높을수록 앞에 보임)
         // 지휘관이 더 앞에 있도록 depth 값을 높게 설정합니다.
