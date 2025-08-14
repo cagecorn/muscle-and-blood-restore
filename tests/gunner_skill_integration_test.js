@@ -345,4 +345,41 @@ assert(frostTrap.trapData && frostTrap.trapData.duration === 3, 'Frost Trap dura
 assert.strictEqual(frostTrap.trapData.effect.id, 'frost', 'Frost Trap effect id failed');
 // --- ▲ [신규] 빙결 함정 테스트 로직 추가 ▲ ---
 
+// --- ▼ [신규] 질풍 사격 테스트 로직 추가 ▼ ---
+const gustShotBase = {
+    NORMAL: {
+        id: 'gustShot',
+        cost: 3,
+        cooldown: 3,
+        range: 3,
+        damageMultiplier: { min: 0.65, max: 0.85 },
+        push: 2
+    }
+};
+const gustShot = skillModifierEngine.getModifiedSkill(gustShotBase.NORMAL, 'NORMAL');
+assert.strictEqual(gustShot.cost, 3, 'Gust Shot cost failed');
+assert.strictEqual(gustShot.cooldown, 3, 'Gust Shot cooldown failed');
+assert.strictEqual(gustShot.push, 2, 'Gust Shot push failed');
+// --- ▲ [신규] 질풍 사격 테스트 로직 추가 ▲ ---
+
+// --- ▼ [신규] 화염 함정 테스트 로직 추가 ▼ ---
+const blastTrapBase = {
+    NORMAL: {
+        id: 'blastTrap',
+        cost: 2,
+        cooldown: 3,
+        range: 3,
+        trapData: {
+            duration: 3,
+            effect: { id: 'burn', type: 'DEBUFF', duration: 2 }
+        }
+    }
+};
+const blastTrap = skillModifierEngine.getModifiedSkill(blastTrapBase.NORMAL, 'NORMAL');
+assert.strictEqual(blastTrap.cost, 2, 'Blast Trap cost failed');
+assert.strictEqual(blastTrap.cooldown, 3, 'Blast Trap cooldown failed');
+assert(blastTrap.trapData && blastTrap.trapData.duration === 3, 'Blast Trap duration failed');
+assert.strictEqual(blastTrap.trapData.effect.id, 'burn', 'Blast Trap effect id failed');
+// --- ▲ [신규] 화염 함정 테스트 로직 추가 ▲ ---
+
 console.log('Gunner skills integration test passed.');

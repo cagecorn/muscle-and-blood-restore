@@ -15,6 +15,9 @@ export const archetypeTriggers = {
         { archetype: 'BERSERKER', mbti: ['E', 'P'] },
         { archetype: 'SPELLBREAKER', mbti: ['N', 'T'] },
     ],
+    GUNNER: [
+        { archetype: 'TRAPMASTER', mbti: ['I', 'N'] },
+    ],
     // ... 추가 클래스
 };
 

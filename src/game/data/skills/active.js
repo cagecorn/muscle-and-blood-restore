@@ -377,6 +377,26 @@ export const activeSkills = {
         }
     },
 
+    // --- ▼ [신규] 질풍 사격 스킬 추가 ▼ ---
+    gustShot: {
+        yinYangValue: -2,
+        NORMAL: {
+            id: 'gustShot',
+            name: '질풍 사격',
+            type: 'ACTIVE',
+            requiredClass: ['gunner'],
+            tags: [SKILL_TAGS.ACTIVE, SKILL_TAGS.RANGED, SKILL_TAGS.PHYSICAL, SKILL_TAGS.KINETIC],
+            cost: 3,
+            description: '적에게 {{damage}}% 데미지를 주고 뒤로 2칸 밀쳐냅니다. (쿨타임 3턴)',
+            illustrationPath: null,
+            damageMultiplier: { min: 0.65, max: 0.85 },
+            cooldown: 3,
+            range: 3,
+            push: 2
+        }
+    },
+    // --- ▲ [신규] 질풍 사격 스킬 추가 ▲ ---
+
     // --- ▼ [신규] 도탄 사격 스킬 추가 ▼ ---
     ricochetShot: {
         yinYangValue: +3,
@@ -1523,6 +1543,30 @@ export const activeSkills = {
                 duration: 3,
                 effect: {
                     id: 'frost',
+                    type: EFFECT_TYPES.DEBUFF,
+                    duration: 2
+                }
+            }
+        }
+    },
+    blastTrap: {
+        yinYangValue: +2,
+        NORMAL: {
+            id: 'blastTrap',
+            name: '화염 함정',
+            type: 'ACTIVE',
+            requiredClass: ['gunner', 'hacker'],
+            tags: [SKILL_TAGS.ACTIVE, SKILL_TAGS.TRAP, SKILL_TAGS.DEBUFF],
+            cost: 2,
+            targetType: 'tile',
+            description: '3턴 동안 유지되는 화염 함정을 설치합니다. 밟은 적은 2턴간 [화상] 상태가 됩니다.',
+            illustrationPath: null,
+            cooldown: 3,
+            range: 3,
+            trapData: {
+                duration: 3,
+                effect: {
+                    id: 'burn',
                     type: EFFECT_TYPES.DEBUFF,
                     duration: 2
                 }
